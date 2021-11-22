@@ -1,5 +1,8 @@
 package com.qinh.redis02.config;
 
+import org.redisson.Redisson;
+import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -17,6 +20,9 @@ import java.io.Serializable;
 @Configuration
 public class RedisConfig {
 
+    @Value("${spring.redis.host}")
+    private String redisHost;
+
     @Bean
     public RedisTemplate<String, Serializable> redisTemplate(LettuceConnectionFactory connectionFactory){
         // 新建 RedisTemplate 对象，key 为 String 对象，value 为 Serializable（可序列化的）对象
@@ -29,5 +35,12 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(connectionFactory);
         // 返回 redisTemplate 对象
         return redisTemplate;
+    }
+
+    @Bean
+    public Redisson redisson() {
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://" + redisHost + ":6379").setDatabase(0);
+        return (Redisson) Redisson.create(config);
     }
 }
